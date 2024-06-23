@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Inter as FontSans } from "next/font/google";
 import RecoilContextProvider from "@/lib/RecoilContextProvider";
+import RouteGuard from "@/lib/routeGuard";
 
 export const metadata: Metadata = {
   title: "CapTrivia!",
@@ -27,7 +28,9 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <RecoilContextProvider>{children}</RecoilContextProvider>
+        <RecoilContextProvider>
+          <RouteGuard>{children}</RouteGuard>
+        </RecoilContextProvider>
       </body>
     </html>
   );

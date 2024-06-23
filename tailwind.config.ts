@@ -36,6 +36,9 @@ const config = {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
+      letterSpacing: {
+        tightest: "-.1em",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

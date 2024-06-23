@@ -35,7 +35,7 @@ export default function Home() {
     fetchGames();
   }, []);
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center">
       <h1 className="text-2xl font-bold mb-4">Game List</h1>
       {isLoading ? (
         <p>Loading games...</p>
