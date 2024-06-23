@@ -15,3 +15,18 @@ export const openPlayerModal = atom({
   key: "openPlayerModal",
   default: false,
 });
+
+export const game = atom({
+  key: "game",
+  default: {},
+});
+
+export const gameModalOpen = atom({
+  key: "gameModalOpen",
+  default: false,
+});
+
+export const createGameError = atom({
+  key: "createGameError",
+  default: "",
+});

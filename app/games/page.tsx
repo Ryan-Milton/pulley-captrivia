@@ -1,14 +1,18 @@
 "use client";
-import { Api, LobbyGame } from "@/api";
+import { api, LobbyGame } from "@/api";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
-import { listOfGames } from "@/state/atom";
-
-const api = new Api("http://localhost:8080/");
+import { useRecoilState, useRecoilValue } from "recoil";
+import { listOfGames, createGameError, gameModalOpen } from "@/state/atom";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import NewGameModal from "@/components/newGameModal";
 
 export default function Home() {
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
+  const [gameError, setGameError] = useRecoilState(createGameError);
+  const [openModal, setOpenModal] = useRecoilState(gameModalOpen);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,26 +38,38 @@ export default function Home() {
 
     fetchGames();
   }, []);
+
+  console.log("games -> ", games);
+
   return (
-    <main className="flex min-h-screen flex-col items-center">
+    <main className="flex flex-col items-center">
       <h1 className="text-2xl font-bold mb-4">Game List</h1>
+      <Button onClick={() => setOpenModal(true)}>Create Game</Button>
       {isLoading ? (
         <p>Loading games...</p>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <div className="max-w-lg">
+          <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
+            {error}
+          </code>
+        </div>
       ) : games.length === 0 ? (
         <p>No games available.</p>
       ) : (
-        <ul className="space-y-2">
+        <ScrollArea className="max-w-2xl">
           {games.map((game) => (
-            <li key={game.id} className="bg-gray-100 p-4 rounded">
-              <h2 className="text-xl font-semibold">{game.name}</h2>
-              <p>Question Count: {game.questionCount}</p>
-              <p>State: {game.state}</p>
-            </li>
+            <>
+              <div key={game.id} className="bg-gray-100 p-4 rounded">
+                <h2 className="text-xl font-semibold">{game.name}</h2>
+                <p>Question Count: {game.question_count}</p>
+                <p>State: {game.state}</p>
+              </div>
+              <Separator />
+            </>
           ))}
-        </ul>
+        </ScrollArea>
       )}
+      <NewGameModal isOpen={openModal} />
     </main>
   );
 }
