@@ -7,6 +7,11 @@ export interface LobbyGame {
   state: "waiting" | "countdown" | "question" | "ended";
 }
 
+export interface LeaderboardEntry {
+  username: string;
+  score: number;
+}
+
 export class Api {
   url: string;
   client: Axios;
@@ -29,6 +34,19 @@ export class Api {
       return JSON.parse(response.data) as LobbyGame[];
     } catch (error) {
       console.error("Error fetching game list:", error);
+      throw error;
+    }
+  };
+
+  fetchLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+    try {
+      const response = await this.client.get("/leaderboard");
+      if (response.status != 200) {
+        throw new Error("Failed to fetch the leaderboard");
+      }
+      return JSON.parse(response.data) as LeaderboardEntry[];
+    } catch (error) {
+      console.error("Error fetching the leaderboard:", error);
       throw error;
     }
   };
