@@ -46,32 +46,31 @@ export default function NewPlayerModal({ isOpen }: NewPlayerModalProps) {
   }
   return (
     <Dialog open={isOpen} onOpenChange={setOpenModal}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create a new user</DialogTitle>
-          <DialogDescription>
-            Fill out the form below to create a new user.
-          </DialogDescription>
+      <DialogContent className="max-w-sm">
+        <DialogHeader className="items-center">
+          <DialogTitle className="text-2xl">Who are you?</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col space-y-8 items-center"
+          >
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input placeholder="name..." {...field} />
                   </FormControl>
-                  <FormDescription>
-                    This is your public display name.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit" className="w-1/2">
+              Let's Play!
+            </Button>
           </form>
         </Form>
       </DialogContent>

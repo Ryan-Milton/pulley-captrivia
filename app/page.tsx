@@ -36,7 +36,7 @@ export default function Home() {
   return (
     <>
       {currentPlayer && <Navbar />}
-      <main className="flex min-h-screen flex-col items-center p-24">
+      <main className="flex min-h-screen flex-col items-center justify-center p-24">
         <h1 className="text-9xl font-bold mb-4 tracking-tightest">
           CapTrivia!
         </h1>
