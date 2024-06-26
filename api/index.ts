@@ -70,6 +70,8 @@ export interface PlayerScore {
   score: number;
 }
 
+export type MessageListener = (message: any) => void;
+
 export class Api {
   url: string;
   client: AxiosInstance;
@@ -167,6 +169,96 @@ export class Api {
       await this.socketOpenPromise; // Wait for the socket to be open
 
       console.log("create game command -> ", command);
+      console.log("nonce type -> ", typeof command.nonce);
+      this.socket.send(JSON.stringify(command)); // Send as string
+    } catch (error) {
+      console.error("Error creating game:", error);
+      throw error;
+    }
+  };
+
+  playerReady = async (gameId: string): Promise<void> => {
+    const command: PlayerCommandReady = {
+      nonce: uuidv4(),
+      type: "ready",
+      payload: {
+        game_id: gameId,
+      },
+    };
+
+    console.log("this.socket -> ", this.socket);
+    console.log("this.socketOpenPromise -> ", this.socketOpenPromise);
+
+    try {
+      if (!this.socket || !this.socketOpenPromise) {
+        throw new Error("Socket is not initialized");
+      }
+
+      await this.socketOpenPromise; // Wait for the socket to be open
+
+      console.log("player ready command -> ", command);
+      console.log("nonce type -> ", typeof command.nonce);
+      this.socket.send(JSON.stringify(command)); // Send as string
+    } catch (error) {
+      console.error("Error creating game:", error);
+      throw error;
+    }
+  };
+
+  playerStart = async (gameId: string): Promise<void> => {
+    const command: PlayerCommandStart = {
+      nonce: uuidv4(),
+      type: "start",
+      payload: {
+        game_id: gameId,
+      },
+    };
+
+    console.log("this.socket -> ", this.socket);
+    console.log("this.socketOpenPromise -> ", this.socketOpenPromise);
+
+    try {
+      if (!this.socket || !this.socketOpenPromise) {
+        throw new Error("Socket is not initialized");
+      }
+
+      await this.socketOpenPromise; // Wait for the socket to be open
+
+      console.log("player start command -> ", command);
+      console.log("nonce type -> ", typeof command.nonce);
+      this.socket.send(JSON.stringify(command)); // Send as string
+    } catch (error) {
+      console.error("Error creating game:", error);
+      throw error;
+    }
+  };
+
+  playerAnswer = async (
+    gameId: string,
+    index: number,
+    questionId: string
+  ): Promise<void> => {
+    const command: PlayerCommandAnswer = {
+      nonce: uuidv4(),
+      type: "answer",
+      payload: {
+        game_id: gameId,
+        index: index,
+        question_id: questionId,
+      },
+    };
+
+    console.log("this.socket -> ", this.socket);
+    console.log("this.socketOpenPromise -> ", this.socketOpenPromise);
+
+    try {
+      if (!this.socket || !this.socketOpenPromise) {
+        throw new Error("Socket is not initialized");
+      }
+
+      await this.socketOpenPromise; // Wait for the socket to be open
+
+      console.log("player answer command -> ", command);
       console.log("nonce type -> ", typeof command.nonce);
       this.socket.send(JSON.stringify(command)); // Send as string
     } catch (error) {

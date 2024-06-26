@@ -2,19 +2,30 @@
 import { api, LobbyGame } from "@/api";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { listOfGames, createGameError, gameModalOpen } from "@/state/atom";
+import { useRecoilState } from "recoil";
+import {
+  listOfGames,
+  createGameError,
+  gameModalOpen,
+  selectedGame,
+  player,
+} from "@/state/atom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import NewGameModal from "@/components/newGameModal";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
   const [gameError, setGameError] = useRecoilState(createGameError);
   const [openModal, setOpenModal] = useRecoilState(gameModalOpen);
+  const [selectedGameInfo, setSelectedGameInfo] = useRecoilState(selectedGame);
+  const [currentPlayer, setCurrentPlayer] = useRecoilState(player);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -39,10 +50,28 @@ export default function Home() {
     fetchGames();
   }, []);
 
+  useEffect(() => {
+    if (games.length > 0) {
+      setSelectedGameInfo(games[0]);
+    }
+  }, [games]);
+
   console.log("games -> ", games);
 
+  if (api.socket) {
+    api.socket!.onmessage = (event) => {
+      console.log("event.data type -> ", typeof event.data);
+      console.log("event.data into JSON -> ", JSON.parse(event.data));
+      const data = JSON.parse(event.data);
+      if (data.payload.players.includes(currentPlayer)) {
+        console.log("navigating to game page");
+        router.push("/game/" + data.id);
+      }
+    };
+  }
+
   return (
-    <main className="flex flex-col items-center">
+    <main className="flex flex-col items-center w-full p-4">
       <h1 className="text-2xl font-bold mb-4">Game List</h1>
       <Button onClick={() => setOpenModal(true)}>Create Game</Button>
       {isLoading ? (
@@ -56,18 +85,32 @@ export default function Home() {
       ) : games.length === 0 ? (
         <p>No games available.</p>
       ) : (
-        <ScrollArea className="max-w-2xl">
-          {games.map((game) => (
-            <>
-              <div key={game.id} className="bg-gray-100 p-4 rounded">
-                <h2 className="text-xl font-semibold">{game.name}</h2>
-                <p>Question Count: {game.question_count}</p>
-                <p>State: {game.state}</p>
-              </div>
-              <Separator />
-            </>
-          ))}
-        </ScrollArea>
+        <div className="flex flex-row w-full">
+          <ScrollArea className="w-3/4 p-4">
+            {games.map((game) => (
+              <>
+                <Button
+                  key={game.id}
+                  variant="ghost"
+                  className="text-xl font-semibold w-full"
+                  onClick={() => setSelectedGameInfo(game)}
+                >
+                  {game.name}
+                </Button>
+                <Separator />
+              </>
+            ))}
+          </ScrollArea>
+          {selectedGameInfo && (
+            <div className="w-1/4">
+              <p>{selectedGameInfo.name}</p>
+              <p>Player Count: {selectedGameInfo.player_count}</p>
+              <p>Question Count: {selectedGameInfo.question_count}</p>
+              <p>State: {selectedGameInfo.state}</p>
+              <Button>Join Game</Button>
+            </div>
+          )}
+        </div>
       )}
       <NewGameModal isOpen={openModal} />
     </main>

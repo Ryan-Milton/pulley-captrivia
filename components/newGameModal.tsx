@@ -71,10 +71,12 @@ export default function NewGameModal({ isOpen }: NewGameModalProps) {
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col space-y-8 items-center"
+            aria-disabled={isLoading}
           >
             <FormField
               control={form.control}
               name="name"
+              disabled={isLoading}
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Name</FormLabel>
@@ -88,6 +90,7 @@ export default function NewGameModal({ isOpen }: NewGameModalProps) {
             <FormField
               control={form.control}
               name="questionCount"
+              disabled={isLoading}
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Question Count</FormLabel>
@@ -104,7 +107,7 @@ export default function NewGameModal({ isOpen }: NewGameModalProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-1/2">
+            <Button disabled={isLoading} type="submit" className="w-1/2">
               Create Game
             </Button>
           </form>

@@ -30,3 +30,8 @@ export const createGameError = atom({
   key: "createGameError",
   default: "",
 });
+
+export const selectedGame = atom({
+  key: "gameInfo",
+  default: <LobbyGame>{},
+});
