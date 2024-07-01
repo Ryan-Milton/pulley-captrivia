@@ -266,6 +266,34 @@ export class Api {
       throw error;
     }
   };
+
+  playerJoin = async (gameId: string): Promise<void> => {
+    const command: PlayerCommandJoin = {
+      nonce: uuidv4(),
+      type: "join",
+      payload: {
+        game_id: gameId,
+      },
+    };
+
+    console.log("this.socket -> ", this.socket);
+    console.log("this.socketOpenPromise -> ", this.socketOpenPromise);
+
+    try {
+      if (!this.socket || !this.socketOpenPromise) {
+        throw new Error("Socket is not initialized");
+      }
+
+      await this.socketOpenPromise; // Wait for the socket to be open
+
+      console.log("player join command -> ", command);
+      console.log("nonce type -> ", typeof command.nonce);
+      this.socket.send(JSON.stringify(command)); // Send as string
+    } catch (error) {
+      console.error("Error creating game:", error);
+      throw error;
+    }
+  };
 }
 
 export const api = new Api("http://localhost:8080/");

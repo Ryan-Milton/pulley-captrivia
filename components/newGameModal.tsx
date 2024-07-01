@@ -66,6 +66,9 @@ export default function NewGameModal({ isOpen }: NewGameModalProps) {
       <DialogContent className="max-w-sm">
         <DialogHeader className="items-center">
           <DialogTitle className="text-2xl">Create Game</DialogTitle>
+          <DialogDescription>
+            Create a new game to play with your friends!
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form

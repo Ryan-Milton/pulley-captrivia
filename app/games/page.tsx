@@ -9,12 +9,14 @@ import {
   gameModalOpen,
   selectedGame,
   player,
+  socketData as sd,
 } from "@/state/atom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import NewGameModal from "@/components/newGameModal";
 import { useRouter } from "next/navigation";
+import { isEmpty } from "@/lib/utils";
 
 export default function Home() {
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
@@ -22,33 +24,34 @@ export default function Home() {
   const [openModal, setOpenModal] = useRecoilState(gameModalOpen);
   const [selectedGameInfo, setSelectedGameInfo] = useRecoilState(selectedGame);
   const [currentPlayer, setCurrentPlayer] = useRecoilState(player);
+  const [socketData, setSocketData] = useRecoilState(sd);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const gameList = await api.fetchGameList();
-        setGames(gameList);
-        setIsLoading(false);
-      } catch (error) {
-        if (error instanceof AxiosError) {
-          setError("Failed to fetch game list: " + error.message);
-        } else {
-          console.error(
-            "An unknown error occurred while fetching the game list:",
-            error
-          );
-          setError("An unknown error occurred. Please try again later.");
-        }
-        setIsLoading(false);
+  const fetchGames = async () => {
+    try {
+      const gameList = await api.fetchGameList();
+      setGames(gameList);
+      setIsLoading(false);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        setError("Failed to fetch game list: " + error.message);
+      } else {
+        console.error(
+          "An unknown error occurred while fetching the game list:",
+          error
+        );
+        setError("An unknown error occurred. Please try again later.");
       }
-    };
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchGames();
-  }, []);
+  }, [socketData]);
 
   useEffect(() => {
     if (games.length > 0) {
@@ -60,15 +63,31 @@ export default function Home() {
 
   if (api.socket) {
     api.socket!.onmessage = (event) => {
-      console.log("event.data type -> ", typeof event.data);
       console.log("event.data into JSON -> ", JSON.parse(event.data));
       const data = JSON.parse(event.data);
-      if (data.payload.players.includes(currentPlayer)) {
+      console.log("data.payload -> ", data.payload);
+      setSocketData(data);
+      if (
+        !isEmpty(data.payload) &&
+        data.payload?.players &&
+        data.payload?.players.includes(currentPlayer)
+      ) {
         console.log("navigating to game page");
         router.push("/game/" + data.id);
       }
     };
   }
+
+  const joinGame = async (gameId: string) => {
+    try {
+      await api.playerJoin(gameId);
+      router.push("/game/" + gameId);
+    } catch (error) {
+      console.error("Error joining game:", error);
+    }
+  };
+
+  console.log("selectedGameInfo -> ", selectedGameInfo);
 
   return (
     <main className="flex flex-col items-center w-full p-4">
@@ -87,10 +106,9 @@ export default function Home() {
       ) : (
         <div className="flex flex-row w-full">
           <ScrollArea className="w-3/4 p-4">
-            {games.map((game) => (
-              <>
+            {games.map((game, idx) => (
+              <div key={idx}>
                 <Button
-                  key={game.id}
                   variant="ghost"
                   className="text-xl font-semibold w-full"
                   onClick={() => setSelectedGameInfo(game)}
@@ -98,7 +116,7 @@ export default function Home() {
                   {game.name}
                 </Button>
                 <Separator />
-              </>
+              </div>
             ))}
           </ScrollArea>
           {selectedGameInfo && (
@@ -107,7 +125,9 @@ export default function Home() {
               <p>Player Count: {selectedGameInfo.player_count}</p>
               <p>Question Count: {selectedGameInfo.question_count}</p>
               <p>State: {selectedGameInfo.state}</p>
-              <Button>Join Game</Button>
+              <Button onClick={() => joinGame(selectedGameInfo.id)}>
+                Join Game
+              </Button>
             </div>
           )}
         </div>

@@ -35,3 +35,8 @@ export const selectedGame = atom({
   key: "gameInfo",
   default: <LobbyGame>{},
 });
+
+export const socketData = atom({
+  key: "socketData",
+  default: {},
+});
