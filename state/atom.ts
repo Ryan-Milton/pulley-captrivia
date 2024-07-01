@@ -38,5 +38,5 @@ export const selectedGame = atom({
 
 export const socketData = atom({
   key: "socketData",
-  default: {},
+  default: <any>{},
 });

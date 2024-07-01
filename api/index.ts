@@ -297,3 +297,17 @@ export class Api {
 }
 
 export const api = new Api("http://localhost:8080/");
+
+export async function fetchGamesList() {
+  return await api.fetchGameList();
+}
+
+export const socketMessageListener = (setter: (data: any) => void) => {
+  if (api.socket) {
+    api.socket!.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("socket message -> ", data);
+      setter(data);
+    };
+  }
+};

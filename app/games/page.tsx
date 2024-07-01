@@ -1,5 +1,5 @@
 "use client";
-import { api, LobbyGame } from "@/api";
+import { api, LobbyGame, fetchGamesList, socketMessageListener } from "@/api";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
@@ -30,27 +30,22 @@ export default function Home() {
 
   const router = useRouter();
 
-  const fetchGames = async () => {
-    try {
-      const gameList = await api.fetchGameList();
+  useEffect(() => {
+    console.log("socketData -> ", socketData);
+    if (!isEmpty(socketData)) {
+      if (
+        !isEmpty(socketData.payload) &&
+        socketData.payload?.players &&
+        socketData.payload?.players.includes(currentPlayer)
+      ) {
+        router.push("/game/" + socketData.id);
+      }
+    }
+    setIsLoading(true);
+    fetchGamesList().then((gameList) => {
       setGames(gameList);
       setIsLoading(false);
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        setError("Failed to fetch game list: " + error.message);
-      } else {
-        console.error(
-          "An unknown error occurred while fetching the game list:",
-          error
-        );
-        setError("An unknown error occurred. Please try again later.");
-      }
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchGames();
+    });
   }, [socketData]);
 
   useEffect(() => {
@@ -59,24 +54,9 @@ export default function Home() {
     }
   }, [games]);
 
-  console.log("games -> ", games);
-
-  if (api.socket) {
-    api.socket!.onmessage = (event) => {
-      console.log("event.data into JSON -> ", JSON.parse(event.data));
-      const data = JSON.parse(event.data);
-      console.log("data.payload -> ", data.payload);
-      setSocketData(data);
-      if (
-        !isEmpty(data.payload) &&
-        data.payload?.players &&
-        data.payload?.players.includes(currentPlayer)
-      ) {
-        console.log("navigating to game page");
-        router.push("/game/" + data.id);
-      }
-    };
-  }
+  useEffect(() => {
+    socketMessageListener(setSocketData);
+  });
 
   const joinGame = async (gameId: string) => {
     try {
@@ -86,8 +66,6 @@ export default function Home() {
       console.error("Error joining game:", error);
     }
   };
-
-  console.log("selectedGameInfo -> ", selectedGameInfo);
 
   return (
     <main className="flex flex-col items-center w-full p-4">
