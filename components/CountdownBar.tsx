@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { Progress } from "./ui/progress";
 
-export default function CountdownTimer({ seconds }: { seconds: number }) {
-  const [countdown, setCountdown] = useState<number>(seconds);
+export default function CountdownBar({ seconds }: { seconds: number }) {
+  const [countdown, setCountdown] = useState<number>(100);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCountdown((prevCountdown) => {
         if (prevCountdown > 0) {
-          return prevCountdown - 1;
+          return prevCountdown - 100 / seconds;
         } else {
           clearInterval(interval);
           return 0;
@@ -17,10 +18,5 @@ export default function CountdownTimer({ seconds }: { seconds: number }) {
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div className="flex flex-col items-center">
-      <p className="text-2xl font-bold mb-4">Time Remaining</p>
-      <p>{countdown}s</p>
-    </div>
-  );
+  return <Progress value={countdown} />;
 }

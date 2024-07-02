@@ -14,7 +14,16 @@ import { useRouter } from "next/navigation";
 import { isEmpty, deepEqual } from "@/lib/utils";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
-import CountdownTimer from "@/components/CountdownTimer";
+import CountdownBar from "@/components/CountdownBar";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function Game({ params }: { params: { slug: string } }) {
   const currentPlayer = useRecoilValue(player);
@@ -82,7 +91,7 @@ export default function Game({ params }: { params: { slug: string } }) {
   }, [selectedGameInfo, games]);
 
   return (
-    <div className="flex flex-col items-center w-full p-4">
+    <div className="flex flex-col items-center w-full p-4 gap-4">
       <p className="text-5xl font-bold">{selectedGameInfo.name}</p>
       {selectedGameInfo.state === "waiting" && (
         <div>
@@ -106,9 +115,9 @@ export default function Game({ params }: { params: { slug: string } }) {
       )}
       {selectedGameInfo.state === "question" && (
         <div>
-          <CountdownTimer seconds={currentQuestion.seconds} />
           <div className="flex flex-col max-w-lg items-center text-center border border-default-border rounded-lg p-4 gap-4">
             <p className="text-xl font-bold">{currentQuestion.question}</p>
+            <CountdownBar seconds={currentQuestion.seconds} />
             <div className=" grid grid-cols-2 gap-4">
               {currentQuestion.options.map((option, idx) => (
                 <div className="flex" key={idx}>
@@ -132,19 +141,32 @@ export default function Game({ params }: { params: { slug: string } }) {
         </div>
       )}
       {selectedGameInfo.state === "ended" && (
-        <div>
-          <p className="text-2xl font-bold">Scores!</p>
-          <div>
-            {score.map((playerScore, idx) => (
-              <div>
-                <div className="flex flex-row" key={idx}>
-                  <p className="flex-1">{playerScore.name}</p>
-                  <p>{playerScore.score}</p>
-                </div>
-                <Separator />
-              </div>
-            ))}
-          </div>
+        <div className="flex flex-col w-full max-w-xs items-center text-center border border-default-border rounded-lg p-4 gap-4">
+          <Table>
+            <TableCaption className="text-xs">
+              Scores are from the previous game played and are accurate and
+              final. To make a complaint or to report a mistake, please contact
+              the game host.
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Player</TableHead>
+                <TableHead className="text-right">Score</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {score.map((playerScore, idx) => (
+                <TableRow key={idx}>
+                  <TableCell className="text-left">
+                    {playerScore.name}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {playerScore.score}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>
