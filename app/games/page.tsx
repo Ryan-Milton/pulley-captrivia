@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import NewGameModal from "@/components/newGameModal";
 import { useRouter } from "next/navigation";
 import { isEmpty } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function Home() {
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
@@ -26,7 +27,6 @@ export default function Home() {
   const [currentPlayer, setCurrentPlayer] = useRecoilState(player);
   const [socketData, setSocketData] = useRecoilState(sd);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -62,8 +62,9 @@ export default function Home() {
     try {
       await api.playerJoin(gameId);
       router.push("/game/" + gameId);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error joining game:", error);
+      toast.error(error.message);
     }
   };
 
@@ -73,12 +74,6 @@ export default function Home() {
       <Button onClick={() => setOpenModal(true)}>Create Game</Button>
       {isLoading ? (
         <p>Loading games...</p>
-      ) : error ? (
-        <div className="max-w-lg">
-          <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-            {error}
-          </code>
-        </div>
       ) : games.length === 0 ? (
         <p>No games available.</p>
       ) : (

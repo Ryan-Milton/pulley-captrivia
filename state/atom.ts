@@ -1,6 +1,13 @@
 import { atom } from "recoil";
 import { LobbyGame } from "@/api";
 
+export interface Question {
+  id: string;
+  options: string[];
+  question: string;
+  seconds: number;
+}
+
 export const listOfGames = atom({
   key: "games",
   default: <LobbyGame[]>[],
@@ -39,4 +46,9 @@ export const selectedGame = atom({
 export const socketData = atom({
   key: "socketData",
   default: <any>{},
+});
+
+export const currentQuestion = atom({
+  key: "currentQuestion",
+  default: <Question>{},
 });
