@@ -1,6 +1,13 @@
 import { atom } from "recoil";
 import { LobbyGame } from "@/api";
 
+export interface Question {
+  id: string;
+  options: string[];
+  question: string;
+  seconds: number;
+}
+
 export const listOfGames = atom({
   key: "games",
   default: <LobbyGame[]>[],
@@ -14,4 +21,34 @@ export const player = atom({
 export const openPlayerModal = atom({
   key: "openPlayerModal",
   default: false,
+});
+
+export const game = atom({
+  key: "game",
+  default: {},
+});
+
+export const gameModalOpen = atom({
+  key: "gameModalOpen",
+  default: false,
+});
+
+export const createGameError = atom({
+  key: "createGameError",
+  default: "",
+});
+
+export const selectedGame = atom({
+  key: "gameInfo",
+  default: <LobbyGame>{},
+});
+
+export const socketData = atom({
+  key: "socketData",
+  default: <any>{},
+});
+
+export const currentQuestion = atom({
+  key: "currentQuestion",
+  default: <Question>{},
 });

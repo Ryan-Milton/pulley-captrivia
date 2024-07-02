@@ -1,7 +1,7 @@
 "use client";
 import Navbar from "@/components/navbar";
 
-export default function GamesLayout({
+export default function GameLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

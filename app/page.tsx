@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/api";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { player, openPlayerModal } from "@/state/atom";
@@ -21,6 +22,7 @@ export default function Home() {
     }
     if (currentPlayer) {
       console.log("currentPlayer", currentPlayer);
+      api.connectWebSocket(currentPlayer);
       setOpenModal(false);
     }
   }, [currentPlayer]);

@@ -3,6 +3,7 @@ import "./globals.css";
 import { Inter as FontSans } from "next/font/google";
 import RecoilContextProvider from "@/lib/RecoilContextProvider";
 import RouteGuard from "@/lib/routeGuard";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "CapTrivia!",
@@ -31,6 +32,7 @@ export default function RootLayout({
         <RecoilContextProvider>
           <RouteGuard>{children}</RouteGuard>
         </RecoilContextProvider>
+        <Toaster richColors />
       </body>
     </html>
   );
