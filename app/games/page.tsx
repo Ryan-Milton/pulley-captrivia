@@ -98,9 +98,11 @@ export default function Home() {
               <p>Player Count: {selectedGameInfo.player_count}</p>
               <p>Question Count: {selectedGameInfo.question_count}</p>
               <p>State: {selectedGameInfo.state}</p>
-              <Button onClick={() => joinGame(selectedGameInfo.id)}>
-                Join Game
-              </Button>
+              {selectedGameInfo.state !== "ended" && (
+                <Button onClick={() => joinGame(selectedGameInfo.id)}>
+                  Join Game
+                </Button>
+              )}
             </div>
           )}
         </div>

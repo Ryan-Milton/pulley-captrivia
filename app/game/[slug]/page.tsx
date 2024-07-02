@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   selectedGame,
-  currentPlayer,
+  player,
   socketData as sd,
   listOfGames,
   currentQuestion as question,
@@ -14,9 +14,10 @@ import { useRouter } from "next/navigation";
 import { isEmpty, deepEqual } from "@/lib/utils";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import CountdownTimer from "@/components/CountdownTimer";
 
 export default function Game({ params }: { params: { slug: string } }) {
-  const currentPlayer = useRecoilValue(currentPlayer);
+  const currentPlayer = useRecoilValue(player);
   const [selectedGameInfo, setSelectedGameInfo] = useRecoilState(selectedGame);
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
   const [socketData, setSocketData] = useRecoilState(sd);
@@ -103,31 +104,28 @@ export default function Game({ params }: { params: { slug: string } }) {
           </Button>
         </div>
       )}
-      {selectedGameInfo.state === "countdown" && (
-        <div>
-          <p className="text-2xl font-bold">Countdown</p>
-          <p>State: {selectedGameInfo.state}</p>
-        </div>
-      )}
       {selectedGameInfo.state === "question" && (
         <div>
-          <div>
+          <CountdownTimer seconds={currentQuestion.seconds} />
+          <div className="flex flex-col max-w-lg items-center text-center border border-default-border rounded-lg p-4 gap-4">
             <p className="text-xl font-bold">{currentQuestion.question}</p>
             <div className=" grid grid-cols-2 gap-4">
               {currentQuestion.options.map((option, idx) => (
-                <Button
-                  key={idx}
-                  variant="outline"
-                  onClick={() => {
-                    api.playerAnswer(
-                      selectedGameInfo.id,
-                      idx,
-                      currentQuestion.id
-                    );
-                  }}
-                >
-                  {option}
-                </Button>
+                <div className="flex" key={idx}>
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-wrap h-full"
+                    onClick={() => {
+                      api.playerAnswer(
+                        selectedGameInfo.id,
+                        idx,
+                        currentQuestion.id
+                      );
+                    }}
+                  >
+                    {option}
+                  </Button>
+                </div>
               ))}
             </div>
           </div>
