@@ -1,7 +1,7 @@
 "use client";
 import { api, LobbyGame, fetchGamesList, socketMessageListener } from "@/api";
 import { AxiosError } from "axios";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import {
   listOfGames,
@@ -35,6 +35,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { LoaderCircle } from "lucide-react";
 
 export default function Home() {
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
@@ -51,6 +52,7 @@ export default function Home() {
     console.log("socketData -> ", socketData);
     setIsLoading(true);
     fetchGamesList().then((gameList) => {
+      console.log("gameList -> ", gameList);
       setGames(gameList);
       setIsLoading(false);
     });

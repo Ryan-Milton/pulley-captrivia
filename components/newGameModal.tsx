@@ -59,6 +59,7 @@ export default function NewGameModal({ isOpen }: NewGameModalProps) {
       setIsLoading(true);
       await api.createGame(gameName, questionCount);
       setOpenModal(false);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error creating game:", error);
       setGameError("Failed to create game: " + error.message);
