@@ -18,6 +18,23 @@ import NewGameModal from "@/components/newGameModal";
 import { useRouter } from "next/navigation";
 import { isEmpty } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function Home() {
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
@@ -32,15 +49,6 @@ export default function Home() {
 
   useEffect(() => {
     console.log("socketData -> ", socketData);
-    if (!isEmpty(socketData)) {
-      if (
-        !isEmpty(socketData.payload) &&
-        socketData.payload?.players &&
-        socketData.payload?.players.includes(currentPlayer)
-      ) {
-        router.push("/game/" + socketData.id);
-      }
-    }
     setIsLoading(true);
     fetchGamesList().then((gameList) => {
       setGames(gameList);
@@ -68,45 +76,111 @@ export default function Home() {
     }
   };
 
+  console.log("selectedGameInfo ->", selectedGameInfo);
+  console.log("socketData ->", socketData);
+
   return (
-    <main className="flex flex-col items-center w-full p-4">
-      <h1 className="text-2xl font-bold mb-4">Game List</h1>
-      <Button onClick={() => setOpenModal(true)}>Create Game</Button>
-      {isLoading ? (
-        <p>Loading games...</p>
-      ) : games.length === 0 ? (
-        <p>No games available.</p>
-      ) : (
-        <div className="flex flex-row w-full">
-          <ScrollArea className="w-3/4 p-4">
-            {games.map((game, idx) => (
-              <div key={idx}>
-                <Button
-                  variant="ghost"
-                  className="text-xl font-semibold w-full"
-                  onClick={() => setSelectedGameInfo(game)}
-                >
-                  {game.name}
-                </Button>
-                <Separator />
-              </div>
-            ))}
-          </ScrollArea>
-          {selectedGameInfo && (
-            <div className="w-1/4">
-              <p>{selectedGameInfo.name}</p>
-              <p>Player Count: {selectedGameInfo.player_count}</p>
-              <p>Question Count: {selectedGameInfo.question_count}</p>
-              <p>State: {selectedGameInfo.state}</p>
-              {selectedGameInfo.state !== "ended" && (
-                <Button onClick={() => joinGame(selectedGameInfo.id)}>
-                  Join Game
-                </Button>
-              )}
-            </div>
+    <main className="flex flex-1 flex-col items-center w-full p-4">
+      <h1 className="text-5xl font-bold mb-4">Game List</h1>
+      <div className="flex flex-1 flex-row w-full">
+        <ScrollArea className="w-3/4 p-4">
+          <Table>
+            {games.length === 0 ? (
+              <TableBody>
+                <TableRow className=" hover:bg-transparent dark:hover:bg-transparent">
+                  <TableCell className="text-center text-xl">
+                    No games available.
+                  </TableCell>
+                </TableRow>
+                <TableRow className=" hover:bg-transparent dark:hover:bg-transparent">
+                  <TableCell className="text-center text-xl">
+                    <Button onClick={() => setOpenModal(true)}>
+                      Create Game
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            ) : (
+              <>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left">Game Name</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {games.map((game, idx) => (
+                    <TableRow
+                      key={idx}
+                      className="hover:cursor-pointer"
+                      onClick={() => setSelectedGameInfo(game)}
+                    >
+                      <TableCell className="text-left">{game.name}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </>
+            )}
+          </Table>
+        </ScrollArea>
+        <div className="flex flex-col w-1/4 justify-between">
+          {games.length > 0 && selectedGameInfo && (
+            <>
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle>{selectedGameInfo.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableBody>
+                      <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                        <TableCell className="text-left">Players</TableCell>
+                        <TableCell className="text-right">
+                          {selectedGameInfo.player_count}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                        <TableCell className="text-left">Questions</TableCell>
+                        <TableCell className="text-right">
+                          {selectedGameInfo.question_count}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                        <TableCell className="text-left">State</TableCell>
+                        <TableCell className="text-right">
+                          {selectedGameInfo.state}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+                <CardFooter>
+                  {socketData.payload?.players &&
+                  socketData.payload?.players.includes(currentPlayer)
+                    ? selectedGameInfo.state !== "ended" && (
+                        <Button
+                          className="w-full"
+                          onClick={() =>
+                            router.push("/game/" + selectedGameInfo.id)
+                          }
+                        >
+                          Enter
+                        </Button>
+                      )
+                    : selectedGameInfo.state !== "ended" && (
+                        <Button
+                          className="w-full"
+                          onClick={() => joinGame(selectedGameInfo.id)}
+                        >
+                          Join Game
+                        </Button>
+                      )}
+                </CardFooter>
+              </Card>
+              <Button onClick={() => setOpenModal(true)}>Create Game</Button>
+            </>
           )}
         </div>
-      )}
+      </div>
       <NewGameModal isOpen={openModal} />
     </main>
   );

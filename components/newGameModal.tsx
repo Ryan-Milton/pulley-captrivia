@@ -21,12 +21,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import gameSchema from "@/lib/gameSchema";
-import { game } from "@/state/atom";
+import { game, player } from "@/state/atom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { gameModalOpen, createGameError } from "@/state/atom";
 import { useRouter } from "next/navigation";
 import { api } from "@/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface NewGameModalProps {
   isOpen: boolean;
@@ -35,9 +35,11 @@ interface NewGameModalProps {
 export default function NewGameModal({ isOpen }: NewGameModalProps) {
   const [currentGame, setCurrentGame] = useRecoilState(game);
   const [openModal, setOpenModal] = useRecoilState(gameModalOpen);
+  const currentPlayer = useRecoilValue(player);
   const [gameError, setGameError] = useRecoilState(createGameError);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
+
   const form = useForm<z.infer<typeof gameSchema>>({
     resolver: zodResolver(gameSchema),
     defaultValues: {
@@ -45,11 +47,13 @@ export default function NewGameModal({ isOpen }: NewGameModalProps) {
       questionCount: 0,
     },
   });
+
   function onSubmit(data: z.infer<typeof gameSchema>) {
     console.log("create game data -> ", data);
-    setCurrentGame(data);
+    setCurrentGame({ ...data, creator: currentPlayer });
     createGame(data.name, data.questionCount);
   }
+
   const createGame = async (gameName: string, questionCount: number) => {
     try {
       setIsLoading(true);
@@ -61,6 +65,7 @@ export default function NewGameModal({ isOpen }: NewGameModalProps) {
       setIsLoading(false);
     }
   };
+
   return (
     <Dialog open={isOpen} onOpenChange={setOpenModal}>
       <DialogContent className="max-w-sm">
@@ -110,7 +115,7 @@ export default function NewGameModal({ isOpen }: NewGameModalProps) {
                 </FormItem>
               )}
             />
-            <Button disabled={isLoading} type="submit" className="w-1/2">
+            <Button disabled={isLoading} type="submit" className="w-full">
               Create Game
             </Button>
           </form>

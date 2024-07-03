@@ -9,6 +9,7 @@ import {
   socketData as sd,
   listOfGames,
   currentQuestion as question,
+  game,
 } from "@/state/atom";
 import { useRouter } from "next/navigation";
 import { isEmpty, deepEqual } from "@/lib/utils";
@@ -24,9 +25,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function Game({ params }: { params: { slug: string } }) {
   const currentPlayer = useRecoilValue(player);
+  const createdGame = useRecoilValue(game);
   const [selectedGameInfo, setSelectedGameInfo] = useRecoilState(selectedGame);
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
   const [socketData, setSocketData] = useRecoilState(sd);
@@ -90,27 +100,59 @@ export default function Game({ params }: { params: { slug: string } }) {
     }
   }, [selectedGameInfo, games]);
 
+  console.log("createdGame ->", createdGame);
+
   return (
     <div className="flex flex-col items-center w-full p-4 gap-4">
       <p className="text-5xl font-bold">{selectedGameInfo.name}</p>
       {selectedGameInfo.state === "waiting" && (
-        <div>
-          <p>Player Count: {selectedGameInfo.player_count}</p>
-          <p>Question Count: {selectedGameInfo.question_count}</p>
-          <p>State: {selectedGameInfo.state}</p>
-          {!readiedUp && (
-            <Button
-              onClick={() => {
-                api.playerReady(selectedGameInfo.id);
-                setReadiedUp(true);
-              }}
-            >
-              Ready Up!
-            </Button>
-          )}
-          <Button onClick={() => api.playerStart(selectedGameInfo.id)}>
-            Start!
-          </Button>
+        <div className="flex flex-col w-full max-w-xs items-center text-center border border-default-border rounded-lg p-4">
+          <Table>
+            <TableBody>
+              <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                <TableCell className="text-left">Players</TableCell>
+                <TableCell className="text-right">
+                  {selectedGameInfo.player_count}
+                </TableCell>
+              </TableRow>
+              <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                <TableCell className="text-left">Questions</TableCell>
+                <TableCell className="text-right">
+                  {selectedGameInfo.question_count}
+                </TableCell>
+              </TableRow>
+              <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                <TableCell className="text-left">State</TableCell>
+                <TableCell className="text-right">
+                  {selectedGameInfo.state}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          <div className="flex flex-row w-full justify-center gap-2">
+            {!readiedUp && (
+              <Button
+                className="flex-1"
+                variant="outline"
+                onClick={() => {
+                  api.playerReady(selectedGameInfo.id);
+                  setReadiedUp(true);
+                }}
+              >
+                Ready Up!
+              </Button>
+            )}
+            {!isEmpty(createdGame) &&
+              createdGame?.creator === currentPlayer && (
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => api.playerStart(selectedGameInfo.id)}
+                >
+                  Start!
+                </Button>
+              )}
+          </div>
         </div>
       )}
       {selectedGameInfo.state === "question" && (
