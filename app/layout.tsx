@@ -4,6 +4,7 @@ import { Inter as FontSans } from "next/font/google";
 import RecoilContextProvider from "@/lib/RecoilContextProvider";
 import RouteGuard from "@/lib/routeGuard";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "CapTrivia!",
@@ -25,14 +26,16 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          "flex flex-1 flex-col min-h-screen bg-background font-sans antialiased",
           fontSans.variable
         )}
       >
-        <RecoilContextProvider>
-          <RouteGuard>{children}</RouteGuard>
-        </RecoilContextProvider>
-        <Toaster richColors />
+        <ThemeProvider attribute="class">
+          <RecoilContextProvider>
+            <RouteGuard>{children}</RouteGuard>
+          </RecoilContextProvider>
+          <Toaster richColors />
+        </ThemeProvider>
       </body>
     </html>
   );

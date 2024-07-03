@@ -5,18 +5,38 @@ import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   selectedGame,
-  currentPlayer,
+  player,
   socketData as sd,
   listOfGames,
   currentQuestion as question,
+  game,
 } from "@/state/atom";
 import { useRouter } from "next/navigation";
 import { isEmpty, deepEqual } from "@/lib/utils";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import CountdownBar from "@/components/CountdownBar";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function Game({ params }: { params: { slug: string } }) {
-  const currentPlayer = useRecoilValue(currentPlayer);
+  const currentPlayer = useRecoilValue(player);
+  const createdGame = useRecoilValue(game);
   const [selectedGameInfo, setSelectedGameInfo] = useRecoilState(selectedGame);
   const [games, setGames] = useRecoilState<LobbyGame[]>(listOfGames);
   const [socketData, setSocketData] = useRecoilState(sd);
@@ -80,73 +100,115 @@ export default function Game({ params }: { params: { slug: string } }) {
     }
   }, [selectedGameInfo, games]);
 
+  console.log("createdGame ->", createdGame);
+
   return (
-    <div className="flex flex-col items-center w-full p-4">
+    <div className="flex flex-col items-center w-full p-4 gap-4">
       <p className="text-5xl font-bold">{selectedGameInfo.name}</p>
       {selectedGameInfo.state === "waiting" && (
-        <div>
-          <p>Player Count: {selectedGameInfo.player_count}</p>
-          <p>Question Count: {selectedGameInfo.question_count}</p>
-          <p>State: {selectedGameInfo.state}</p>
-          {!readiedUp && (
-            <Button
-              onClick={() => {
-                api.playerReady(selectedGameInfo.id);
-                setReadiedUp(true);
-              }}
-            >
-              Ready Up!
-            </Button>
-          )}
-          <Button onClick={() => api.playerStart(selectedGameInfo.id)}>
-            Start!
-          </Button>
-        </div>
-      )}
-      {selectedGameInfo.state === "countdown" && (
-        <div>
-          <p className="text-2xl font-bold">Countdown</p>
-          <p>State: {selectedGameInfo.state}</p>
+        <div className="flex flex-col w-full max-w-xs items-center text-center border border-default-border rounded-lg p-4">
+          <Table>
+            <TableBody>
+              <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                <TableCell className="text-left">Players</TableCell>
+                <TableCell className="text-right">
+                  {selectedGameInfo.player_count}
+                </TableCell>
+              </TableRow>
+              <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                <TableCell className="text-left">Questions</TableCell>
+                <TableCell className="text-right">
+                  {selectedGameInfo.question_count}
+                </TableCell>
+              </TableRow>
+              <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                <TableCell className="text-left">State</TableCell>
+                <TableCell className="text-right">
+                  {selectedGameInfo.state}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          <div className="flex flex-row w-full justify-center gap-2">
+            {!readiedUp && (
+              <Button
+                className="flex-1"
+                variant="outline"
+                onClick={() => {
+                  api.playerReady(selectedGameInfo.id);
+                  setReadiedUp(true);
+                }}
+              >
+                Ready Up!
+              </Button>
+            )}
+            {!isEmpty(createdGame) &&
+              createdGame?.creator === currentPlayer && (
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => api.playerStart(selectedGameInfo.id)}
+                >
+                  Start!
+                </Button>
+              )}
+          </div>
         </div>
       )}
       {selectedGameInfo.state === "question" && (
         <div>
-          <div>
+          <div className="flex flex-col max-w-lg items-center text-center border border-default-border rounded-lg p-4 gap-4">
             <p className="text-xl font-bold">{currentQuestion.question}</p>
+            <CountdownBar seconds={currentQuestion.seconds} />
             <div className=" grid grid-cols-2 gap-4">
               {currentQuestion.options.map((option, idx) => (
-                <Button
-                  key={idx}
-                  variant="outline"
-                  onClick={() => {
-                    api.playerAnswer(
-                      selectedGameInfo.id,
-                      idx,
-                      currentQuestion.id
-                    );
-                  }}
-                >
-                  {option}
-                </Button>
+                <div className="flex" key={idx}>
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-wrap h-full"
+                    onClick={() => {
+                      api.playerAnswer(
+                        selectedGameInfo.id,
+                        idx,
+                        currentQuestion.id
+                      );
+                    }}
+                  >
+                    {option}
+                  </Button>
+                </div>
               ))}
             </div>
           </div>
         </div>
       )}
       {selectedGameInfo.state === "ended" && (
-        <div>
-          <p className="text-2xl font-bold">Scores!</p>
-          <div>
-            {score.map((playerScore, idx) => (
-              <div>
-                <div className="flex flex-row" key={idx}>
-                  <p className="flex-1">{playerScore.name}</p>
-                  <p>{playerScore.score}</p>
-                </div>
-                <Separator />
-              </div>
-            ))}
-          </div>
+        <div className="flex flex-col w-full max-w-xs items-center text-center border border-default-border rounded-lg p-4 gap-4">
+          <Table>
+            <TableCaption className="text-xs">
+              Scores are from the previous game played and are accurate and
+              final. To make a complaint or to report a mistake, please contact
+              the game host.
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Player</TableHead>
+                <TableHead className="text-right">Score</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {score.map((playerScore, idx) => (
+                <TableRow key={idx}>
+                  <TableCell className="text-left">
+                    {playerScore.name}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {playerScore.score}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

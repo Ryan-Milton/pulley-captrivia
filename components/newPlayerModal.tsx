@@ -68,7 +68,7 @@ export default function NewPlayerModal({ isOpen }: NewPlayerModalProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-1/2">
+            <Button type="submit" className="w-full">
               Let's Play!
             </Button>
           </form>

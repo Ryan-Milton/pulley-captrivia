@@ -9,7 +9,7 @@ export default function GamesLayout({
   return (
     <>
       <Navbar />
-      <main className="flex flex-col items-center">{children}</main>
+      <main className="flex flex-1 flex-col items-center">{children}</main>
     </>
   );
 }
